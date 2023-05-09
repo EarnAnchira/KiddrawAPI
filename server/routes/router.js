@@ -8,7 +8,7 @@ const fs = require('fs');
 //img storage confing
 var imgconfig = multer.diskStorage({
     destination: (req, file, callback) => {
-        callback(null, "./public")
+        callback(null, "./uploads")
     },
     filename: (req, file, callback) => {
         callback(null, `image-${Date.now()}.${file.originalname}`)
@@ -28,7 +28,7 @@ var upload = multer({
     fileFilter: isImage
 })
 
-//publictory
+//uploadstory
 router.post("/storyform/:AdminName", upload.single("photo"), (req, res) => {
     const { fid } = req.body;
     const { filename } = req.file;
@@ -38,14 +38,14 @@ router.post("/storyform/:AdminName", upload.single("photo"), (req, res) => {
     const { fintroductionstoryeng } = req.body;
     const { fintroductionstorythai } = req.body;
     const { fpublishername } = req.body;
-    const { fdatepublication } = req.body;
+    const { fdateuploadsation } = req.body;
     const { AdminName } = req.params;
-    if (!filename || !fid || !fstorytitleeng || !fstorytitlethai || !fauthor || !fintroductionstoryeng || !fintroductionstorythai || !fpublishername || !fdatepublication) {
+    if (!filename || !fid || !fstorytitleeng || !fstorytitlethai || !fauthor || !fintroductionstoryeng || !fintroductionstorythai || !fpublishername || !fdateuploadsation) {
         res.status(422).json({ status: 422, message: "fill all the details" })
     }
     try {
         let date = moment(new Date()).format("YYYY-MM-DD hh:mm:ss");
-        conn.query("INSERT INTO Story SET ?", { AdminName: AdminName, StoryID: fid, StoryImage: filename, date: date, StoryTitleEng: fstorytitleeng, StoryTitleThai: fstorytitlethai, Author: fauthor, IntroductionStoryEng: fintroductionstoryeng, IntroductionStoryThai: fintroductionstorythai, PublisherName: fpublishername, DatePublication: fdatepublication }, (err, result) => {
+        conn.query("INSERT INTO Story SET ?", { AdminName: AdminName, StoryID: fid, StoryImage: filename, date: date, StoryTitleEng: fstorytitleeng, StoryTitleThai: fstorytitlethai, Author: fauthor, IntroductionStoryEng: fintroductionstoryeng, IntroductionStoryThai: fintroductionstorythai, PublisherName: fpublishername, Dateuploadsation: fdateuploadsation }, (err, result) => {
             if (err) {
                 console.log("error")
             } else {
@@ -273,11 +273,11 @@ router.patch('/updatestory/:StoryID', upload.single("photo"), (req, res) => {
     const { IntroductionStoryEng } = req.body;
     const { IntroductionStoryThai } = req.body;
     const { PublisherName } = req.body;
-    const { DatePublication } = req.body;
+    const { Dateuploadsation } = req.body;
     let date = moment(new Date()).format("YYYY-MM-DD hh:mm:ss");
     const sql = `UPDATE Story SET StoryTitleEng = '${StoryTitleEng}',StoryTitleThai = '${StoryTitleThai}',date= '${date}',
     Author = '${Author}',IntroductionStoryEng = '${IntroductionStoryEng}',IntroductionStoryThai = '${IntroductionStoryThai}', 
-    PublisherName= '${PublisherName}',DatePublication = '${DatePublication}' 
+    PublisherName= '${PublisherName}',Dateuploadsation = '${Dateuploadsation}' 
     WHERE StoryID = '${StoryID}'`;
     conn.query(sql, (err, results) => {
         if (err) {
@@ -414,7 +414,7 @@ router.post("/canvas/:UserName/:StoryID", async (req, res) => {
     const fileName = Date.now() + '.png'; // Generate unique file name
     try {
         // Decode base64 PNG data and write to file
-        const filePath = `public/${fileName}`;
+        const filePath = `uploads/${fileName}`;
         const fileData = pngData.replace(/^data:image\/png;base64,/, "");
         fs.writeFileSync(filePath, fileData, 'base64');
         // Insert file path into MySQL table
