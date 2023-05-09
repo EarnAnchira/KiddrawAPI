@@ -8,7 +8,7 @@ const fs = require('fs');
 //img storage confing
 var imgconfig = multer.diskStorage({
     destination: (req, file, callback) => {
-        callback(null, "./uploads")
+        callback(null, "./public")
     },
     filename: (req, file, callback) => {
         callback(null, `image-${Date.now()}.${file.originalname}`)
@@ -28,7 +28,7 @@ var upload = multer({
     fileFilter: isImage
 })
 
-//uploadStory
+//publictory
 router.post("/storyform/:AdminName", upload.single("photo"), (req, res) => {
     const { fid } = req.body;
     const { filename } = req.file;
@@ -414,7 +414,7 @@ router.post("/canvas/:UserName/:StoryID", async (req, res) => {
     const fileName = Date.now() + '.png'; // Generate unique file name
     try {
         // Decode base64 PNG data and write to file
-        const filePath = `uploads/${fileName}`;
+        const filePath = `public/${fileName}`;
         const fileData = pngData.replace(/^data:image\/png;base64,/, "");
         fs.writeFileSync(filePath, fileData, 'base64');
         // Insert file path into MySQL table
