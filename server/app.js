@@ -8,11 +8,11 @@ const cors = require("cors")
 const router = require("./routes/router")
 
 app.use(express.json());
-app.use(express.static('uploads'));
+app.use(express.static('public'));
 app.use(cors());
 app.use("/uploads",express.static("./uploads"))
 app.use(router);
 
-app.listen(process.env.PORT||port,()=>{
+app.listen(port,()=>{
     console.log("server start")
 })

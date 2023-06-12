@@ -4,7 +4,6 @@ const conn = require("../db/conn");
 const multer = require("multer");
 const moment = require("moment")
 const fs = require('fs');
-
 //img storage confing
 var imgconfig = multer.diskStorage({
     destination: (req, file, callback) => {
@@ -14,7 +13,6 @@ var imgconfig = multer.diskStorage({
         callback(null, `image-${Date.now()}.${file.originalname}`)
     }
 });
-
 // img filter
 const isImage = (req, file, callback) => {
     if (file.mimetype.startsWith("image")) {
@@ -27,7 +25,17 @@ var upload = multer({
     storage: imgconfig,
     fileFilter: isImage
 })
-
+// get username 
+router.get("/getuser/:UserName", (req, res) => {
+    const { UserName } = req.params;
+    conn.query("SELECT * FROM User WHERE UserName = ? ", UserName, (err, result) => {
+        if (err) {
+            res.status(422).json("error");
+        } else {
+            res.status(201).json(result);
+        }
+    })
+});
 //uploadstory
 router.post("/storyform/:AdminName", upload.single("photo"), (req, res) => {
     const { fid } = req.body;
@@ -57,7 +65,6 @@ router.post("/storyform/:AdminName", upload.single("photo"), (req, res) => {
         res.status(422).json({ status: 422, error })
     }
 });
-
 //upload Dressing
 router.post("/uploaddressing/:AdminName", upload.single("photo"), (req, res) => {
     const { filename } = req.file;
@@ -91,7 +98,6 @@ router.post("/uploaddressing/:AdminName", upload.single("photo"), (req, res) => 
         res.status(422).json({ status: 422, error })
     }
 });
-
 //Upload Story Detail Alternative
 router.use(express.urlencoded({ extended: true }));
 const path = require('path');
@@ -106,7 +112,6 @@ router.post("/storydetailalternative", upload.single("photo"), function (req, re
     const PageNoAnswer1Extra = req.body.PageNoAnswer1Extra;
     const PageNoAnswer2Extra = req.body.PageNoAnswer2Extra;
     const StoryID = req.body.StoryID;
-    // const id = uuidv4();
     const StoryDetailThai = req.body.StoryDetailThai;
     const QuestionEng = req.body.QuestionEng;
     const QuestionThai = req.body.QuestionThai;
@@ -147,7 +152,7 @@ router.post("/storydetailalternative", upload.single("photo"), function (req, re
             res.send('GTTS output saved successfully.');
         });
 });
-
+//Upload Story Detail Normal
 router.post("/storydetailnormal", upload.single("photo"), function (req, res) {
     const StoryDetailEng = req.body.StoryDetailEng;
     const PageNo = req.body.PageNo;
@@ -155,7 +160,6 @@ router.post("/storydetailnormal", upload.single("photo"), function (req, res) {
     const PageNoAnswer1Extra = req.body.PageNoAnswer1Extra;
     const PageNoAnswer2Extra = req.body.PageNoAnswer2Extra;
     const StoryID = req.body.StoryID;
-    // const id = uuidv4();
     const StoryDetailThai = req.body.StoryDetailThai;
     const { filename } = req.file;
     gtts.save(`audio/${PageNo}${StoryID}Eng.mp3`, path.join(StoryDetailEng),
@@ -178,8 +182,6 @@ router.post("/storydetailnormal", upload.single("photo"), function (req, res) {
             res.send('GTTS output saved successfully.');
         });
 });
-
-
 // Upload Character
 router.post("/characterform", upload.single("photo"), function (req, res) {
     const StoryID = req.body.StoryID;
@@ -194,7 +196,6 @@ router.post("/characterform", upload.single("photo"), function (req, res) {
     });
     res.send('saved successfully.');
 });
-
 // get data and search
 router.get("/getdata", (req, res) => {
     const query = req.query.q;
@@ -211,11 +212,10 @@ router.get("/getdata", (req, res) => {
         res.status(422).json({ status: 422, error })
     }
 });
-
 // get last story
 router.get("/getdatalast", (req, res) => {
     try {
-        conn.query(`SELECT * FROM Story WHERE StoryTitleEng ORDER BY date DESC LIMIT 3 `, (err, result) => {
+        conn.query(`SELECT * FROM Story ORDER BY StoryID DESC LIMIT 3 `, (err, result) => {
             if (err) {
                 console.log("error")
             } else {
@@ -227,7 +227,6 @@ router.get("/getdatalast", (req, res) => {
         res.status(422).json({ status: 422, error })
     }
 });
-
 // get single data
 router.get("/getdata/:StoryID", (req, res) => {
     const { StoryID } = req.params;
@@ -239,7 +238,6 @@ router.get("/getdata/:StoryID", (req, res) => {
         }
     })
 });
-
 // get Character
 router.get("/getcharacter/:StoryID", (req, res) => {
     const { StoryID } = req.params;
@@ -251,7 +249,6 @@ router.get("/getcharacter/:StoryID", (req, res) => {
         }
     })
 });
-
 // get Character Custom
 router.get("/charactercustom/:CustomID", (req, res) => {
     const { CustomID } = req.params;
@@ -263,7 +260,6 @@ router.get("/charactercustom/:CustomID", (req, res) => {
         }
     })
 });
-
 // Update Story
 router.patch('/updatestory/:StoryID', upload.single("photo"), (req, res) => {
     const StoryID = req.params.StoryID;
@@ -287,7 +283,6 @@ router.patch('/updatestory/:StoryID', upload.single("photo"), (req, res) => {
         }
     });
 });
-
 //Delete Story
 router.delete("/:StoryID", (req, res) => {
     const { StoryID } = req.params;
@@ -304,7 +299,6 @@ router.delete("/:StoryID", (req, res) => {
         res.status(422).json({ status: 422, error })
     }
 })
-
 // Regiter Admin
 router.post("/registeradmin", upload.single("photo"), (req, res) => {
     const { fadminname } = req.body;
@@ -334,7 +328,6 @@ router.post("/registeradmin", upload.single("photo"), (req, res) => {
         res.status(422).json({ status: 422, error })
     }
 });
-
 // Login Admin
 router.post("/loginadmin/:AdminName", async (req, res) => {
     const AdminName = req.body.AdminName
@@ -354,7 +347,6 @@ router.post("/loginadmin/:AdminName", async (req, res) => {
         }
     );
 });
-
 // Regiter Member
 router.post("/registermember", upload.single("photo"), (req, res) => {
     const { fusername } = req.body;
@@ -385,7 +377,6 @@ router.post("/registermember", upload.single("photo"), (req, res) => {
         res.status(422).json({ status: 422, error })
     }
 });
-
 // Login Member
 router.post("/loginmember/:UserName", (req, res) => {
     const UserName = req.body.UserName
@@ -405,7 +396,6 @@ router.post("/loginmember/:UserName", (req, res) => {
         }
     );
 });
-
 //Save Drawing
 router.post("/canvas/:UserName/:StoryID", async (req, res) => {
     const { pngData } = req.body;
@@ -431,13 +421,11 @@ router.post("/canvas/:UserName/:StoryID", async (req, res) => {
         res.status(500).send();
     }
 });
-
 //Uploadimg
 router.post("/uploadimage/:UserName/:StoryID", upload.single("photo"), (req, res) => {
     const { filename } = req.file;
     const { StoryID } = req.params;
     const { UserName } = req.params;
-
     if (!filename) {
         res.status(422).json({ status: 422, message: "fill all the details" })
     }
@@ -455,7 +443,6 @@ router.post("/uploadimage/:UserName/:StoryID", upload.single("photo"), (req, res
         res.status(422).json({ status: 422, error })
     }
 });
-
 //Pose Animator Custom
 router.get("/poseanimatorCustom/:StoryID", (req, res) => {
     const { StoryID } = req.params;
@@ -467,7 +454,6 @@ router.get("/poseanimatorCustom/:StoryID", (req, res) => {
         }
     })
 });
-
 //PoseAnimator Story Title
 router.get("/poseanimatorT/:StoryID", (req, res) => {
     const { StoryID } = req.params;
@@ -479,7 +465,6 @@ router.get("/poseanimatorT/:StoryID", (req, res) => {
         }
     })
 });
-
 //StoryDetail PoseAnimator
 router.get("/poseanimatorD/:StoryID", (req, res) => {
     const { StoryID } = req.params;
@@ -491,7 +476,6 @@ router.get("/poseanimatorD/:StoryID", (req, res) => {
         }
     })
 });
-
 //StoryDetail PoseAnimatorAnswer1
 router.get("/poseanimatorD/:StoryID/:PageNoAnswer1", (req, res) => {
     const { StoryID } = req.params;
@@ -504,7 +488,6 @@ router.get("/poseanimatorD/:StoryID/:PageNoAnswer1", (req, res) => {
         }
     })
 });
-
 //StoryDetail PoseAnimatorAnswer2
 router.get("/poseanimatorD/:StoryID/:PageNoAnswer2", (req, res) => {
     const { StoryID } = req.params;
@@ -517,7 +500,6 @@ router.get("/poseanimatorD/:StoryID/:PageNoAnswer2", (req, res) => {
         }
     })
 });
-
 //StoryDetail PoseAnimatorNormal
 router.get("/poseanimatorD/:StoryID/:PageNoNext/:PageNoAnswer1Extra/:PageNoAnswer2Extra", (req, res) => {
     const { StoryID } = req.params;
@@ -532,7 +514,6 @@ router.get("/poseanimatorD/:StoryID/:PageNoNext/:PageNoAnswer1Extra/:PageNoAnswe
         }
     })
 });
-
 // Audio Story Detail PoseAnimator
 router.get('/audioeng/:StoryID', (req, res) => {
     const { StoryID } = req.params;
@@ -552,7 +533,6 @@ router.get('/audiothai/:StoryID', (req, res) => {
         fileStream.pipe(res);
     });
 });
-
 // Audio Story Detail PoseAnimatorNormal
 router.get('/audioeng/:StoryID/:PageNoNext', (req, res) => {
     const { StoryID } = req.params;
@@ -574,7 +554,6 @@ router.get('/audiothai/:StoryID/:PageNoNext', (req, res) => {
         fileStream.pipe(res);
     });
 });
-
 //Audio Story Detail Pose Animator Next1
 router.get('/audioeng/:StoryID/:PageNoAnswer1', (req, res) => {
     const { StoryID } = req.params;
@@ -596,7 +575,6 @@ router.get('/audiothai/:StoryID/:PageNoAnswer1', (req, res) => {
         fileStream.pipe(res);
     });
 });
-
 //Audio Story Detail Pose Animator Next2
 router.get('/audioeng/:StoryID/:PageNoAnswer2', (req, res) => {
     const { StoryID } = req.params;
@@ -618,7 +596,6 @@ router.get('/audiothai/:StoryID/:PageNoAnswer2', (req, res) => {
         fileStream.pipe(res);
     });
 });
-
 //Audio Answer Pose Animator
 router.get('/audioanswereng1/:StoryID/:PageNoNext', (req, res) => {
     const { StoryID } = req.params;
@@ -640,7 +617,6 @@ router.get('/audioanswereng2/:StoryID/:PageNoNext', (req, res) => {
         fileStream.pipe(res);
     });
 });
-
 //Audio Answer Pose Animator Next
 router.get('/audioanswereng1/:StoryID/:PageNoAnswer1', (req, res) => {
     const { StoryID } = req.params;
@@ -662,7 +638,6 @@ router.get('/audioanswereng2/:StoryID/:PageNoAnswer1', (req, res) => {
         fileStream.pipe(res);
     });
 });
-
 //Audio Answer2 Pose Animator Next
 router.get('/audioanswereng1/:StoryID/:PageNoAnswer2', (req, res) => {
     const { StoryID } = req.params;
@@ -684,7 +659,6 @@ router.get('/audioanswereng2/:StoryID/:PageNoAnswer2', (req, res) => {
         fileStream.pipe(res);
     });
 });
-
 // Show Dressing Head
 router.get('/GetDressingHead', (req, res) => {
     const sql = `SELECT HeadImg FROM Dressing WHERE DressingType='Head'`;
@@ -697,7 +671,6 @@ router.get('/GetDressingHead', (req, res) => {
         }
     });
 });
-
 // Show Dressing Body
 router.get('/GetDressingBody', (req, res) => {
     const sql = `SELECT BodyImg FROM Dressing WHERE DressingType='Body'`;
@@ -710,7 +683,6 @@ router.get('/GetDressingBody', (req, res) => {
         }
     });
 });
-
 // Save Dressing
 router.post('/SaveDressing/:UserName/:StoryID', (req, res) => {
     const { HeadImg } = req.body[0];
@@ -728,5 +700,4 @@ router.post('/SaveDressing/:UserName/:StoryID', (req, res) => {
         }
     });
 });
-
 module.exports = router;
